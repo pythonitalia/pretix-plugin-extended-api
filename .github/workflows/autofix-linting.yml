@@ -9,10 +9,27 @@ jobs:
     if: github.event.issue.pull_request != '' && contains(github.event.comment.body, '/fix')
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/github-script@v3
+        id: get-pr
+        with:
+          script: |
+            const request = {
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: context.issue.number
+            }
+
+            core.info(`Getting PR #${request.pull_number} from ${request.owner}/${request.repo}`)
+            try {
+              const result = await github.pulls.get(request)
+              return result.data
+            } catch (err) {
+              core.setFailed(`Request failed with error ${err}`)
+            }
       - uses: actions/checkout@v2
         with:
           persist-credentials: false
-          ref: ${{ github.event.pull_request.head.ref }}
+          ref: ${{ fromJSON(steps.get-pr.outputs.result).head.sha }}
       - name: Set up Python
         uses: actions/setup-python@v1
         with:
@@ -38,9 +55,6 @@ jobs:
           git config user.name "Python Italia [bot]"
           git config user.email "noreply@python.it"
 
-          echo $GITHUB_HEAD_REF
-          git status
-          git checkout "$GITHUB_HEAD_REF"
           git status
           git add --all
           git commit -m "Autofix"

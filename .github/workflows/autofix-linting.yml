@@ -1,0 +1,41 @@
+on:
+  issue_comment:
+    types: [created]
+
+name: Automatic Fix
+jobs:
+  autofix:
+    name: Rebase
+    if: github.event.issue.pull_request != '' && contains(github.event.comment.body, '/fix')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          persist-credentials: false
+      - name: Set up Python
+        uses: actions/setup-python@v1
+        with:
+          python-version: 3.9
+      - uses: actions/cache@v1
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-autofix-${{ hashFiles('**/poetry.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-autofix-
+      - name: Install Dependencies
+        run: pip3 install pretix docformatter black isort
+      - name: Autofix
+        run: |
+          docformatter -r .
+          isort .
+          black .
+      - name: Commit fixes
+        run: |
+          git remote set-url origin https://${{ secrets.BOT_TOKEN }}@github.com/${{ github.repository }}
+
+          git config user.name "Python Italia [bot]"
+          git config user.email "noreply@python.it"
+
+          git add --all
+          git commit -m "Autofix"
+          git push

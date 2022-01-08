@@ -6,7 +6,7 @@ on:
     paths-ignore:
       - 'pretix_extended_api/locale/**'
   pull_request:
-    branches: [ main, master ]
+    branches: [ main ]
     paths-ignore:
       - 'pretix_extended_api/locale/**'
 

@@ -3,7 +3,7 @@ Extended API
 
 This is a plugin for `pretix`_.
 
-Short description
+Extend the REST API to expose more information needed by the PyCon Italia repository.
 
 Development setup
 -----------------

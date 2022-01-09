@@ -15,7 +15,7 @@ class PluginApp(PluginConfig):
     class PretixPluginMeta:
         name = gettext_lazy("Extended API")
         author = "Python Italia"
-        description = gettext_lazy("Short description")
+        description = gettext_lazy("Extend the REST API to expose more information needed by PyCon Italia")
         visible = True
         version = __version__
         category = "API"

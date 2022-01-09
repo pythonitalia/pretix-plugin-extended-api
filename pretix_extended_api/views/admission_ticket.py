@@ -35,15 +35,12 @@ class AdmissionTicketViewSet(viewsets.ViewSet):
             item__admission=True,
         )
 
-        events_filter = reduce(
-            or_,
-            [
-                Q(
-                    order__event__slug=event["event_slug"],
-                    order__event__organizer__slug=event["organizer_slug"],
-                )
-                for event in events
-            ],
-        )
+        events_filter = Q()
+        for event in events:
+            events_filter |= Q(
+                order__event__slug=event["event_slug"],
+                order__event__organizer__slug=event["organizer_slug"],
+            )
+
         qs = qs.filter(events_filter)
         return Response({"user_has_admission_ticket": qs.exists()})

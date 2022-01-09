@@ -1,10 +1,19 @@
+from unittest import mock
+from decimal import Decimal
+
+from django_countries.fields import Country
 import pytest
-from datetime import datetime
+import datetime
 from django_scopes import scopes_disabled
 from pretix.base.models import Event, Organizer, Team
 from pytz import UTC
 from rest_framework.test import APIClient
-
+from pretix.base.models import (
+    InvoiceAddress, Order, OrderPosition, Question, SeatingPlan,
+)
+from pretix.base.models.orders import (
+    CartPosition, OrderFee, OrderPayment, OrderRefund, QuestionAnswer,
+)
 
 @pytest.fixture
 def client():
@@ -25,12 +34,34 @@ def organizer():
 
 @pytest.fixture
 @scopes_disabled()
+def organizer2():
+    return Organizer.objects.create(name="Python Italia", slug="python-italia")
+
+
+@pytest.fixture
+@scopes_disabled()
 def event(organizer, meta_prop):
     e = Event.objects.create(
         organizer=organizer,
         name="Dummy",
         slug="dummy",
-        date_from=datetime(2017, 12, 27, 10, 0, 0, tzinfo=UTC),
+        date_from=datetime.datetime(2017, 12, 27, 10, 0, 0, tzinfo=UTC),
+        plugins="pretix_extended_api",
+        is_public=True,
+    )
+    e.meta_values.create(property=meta_prop, value="Conference")
+    e.item_meta_properties.create(name="day", default="Monday")
+    e.settings.timezone = "Europe/Berlin"
+    return e
+
+@pytest.fixture
+@scopes_disabled()
+def event2(organizer2, meta_prop):
+    e = Event.objects.create(
+        organizer=organizer2,
+        name="Smart",
+        slug="smart",
+        date_from=datetime.datetime(2017, 12, 27, 10, 0, 0, tzinfo=UTC),
         plugins="pretix_extended_api",
         is_public=True,
     )
@@ -69,3 +100,85 @@ def token_client(client, team):
     t = team.tokens.create(name="Foo")
     client.credentials(HTTP_AUTHORIZATION="Token " + t.token)
     return client
+
+@pytest.fixture
+@scopes_disabled()
+def admission_item(event):
+    return event.items.create(name="Budget Ticket", admission=True, default_price=23)
+
+
+@pytest.fixture
+@scopes_disabled()
+def admission_item_event2(event2):
+    return event2.items.create(name="Budget Ticket", admission=True, default_price=23)
+
+@pytest.fixture
+@scopes_disabled()
+def order(event, admission_item):
+    testtime = datetime.datetime(2017, 12, 1, 10, 0, 0, tzinfo=UTC)
+    event.plugins += ",pretix.plugins.stripe"
+    event.save()
+
+    with mock.patch('django.utils.timezone.now') as mock_now:
+        mock_now.return_value = testtime
+        o = Order.objects.create(
+            code='FOO', event=event, email='dummy@dummy.test',
+            status=Order.STATUS_PAID, secret="k24fiuwvu8kxz3y1",
+            datetime=datetime.datetime(2017, 12, 1, 10, 0, 0, tzinfo=UTC),
+            expires=datetime.datetime(2017, 12, 10, 10, 0, 0, tzinfo=UTC),
+            total=23, locale='en'
+        )
+        o.payments.create(
+            provider='banktransfer',
+            state='pending',
+            amount=Decimal('23.00'),
+        )
+        InvoiceAddress.objects.create(order=o, company="Sample company", country=Country('NZ'),
+                                      vat_id="DE123", vat_id_validated=True)
+        OrderPosition.objects.create(
+            order=o,
+            item=admission_item,
+            variation=None,
+            price=Decimal("23"),
+            attendee_name_parts={"full_name": "Peter", "_scheme": "full"},
+            attendee_email="test@email.it",
+            secret="z3fsn8jyufm5kpk768q69gkbyr5f4h6w",
+            pseudonymization_id="ABCDEFGHKL",
+        )
+        return o
+
+
+@pytest.fixture
+@scopes_disabled()
+def order_event_2(event2, admission_item_event2):
+    testtime = datetime.datetime(2017, 12, 1, 10, 0, 0, tzinfo=UTC)
+    event2.plugins += ",pretix.plugins.stripe"
+    event2.save()
+
+    with mock.patch('django.utils.timezone.now') as mock_now:
+        mock_now.return_value = testtime
+        o = Order.objects.create(
+            code='FOO', event=event2, email='dummy@dummy.test',
+            status=Order.STATUS_PAID, secret="k24fiuwvu8kxz3y1",
+            datetime=datetime.datetime(2017, 12, 1, 10, 0, 0, tzinfo=UTC),
+            expires=datetime.datetime(2017, 12, 10, 10, 0, 0, tzinfo=UTC),
+            total=23, locale='en'
+        )
+        o.payments.create(
+            provider='banktransfer',
+            state='pending',
+            amount=Decimal('23.00'),
+        )
+        InvoiceAddress.objects.create(order=o, company="Sample company", country=Country('NZ'),
+                                      vat_id="DE123", vat_id_validated=True)
+        OrderPosition.objects.create(
+            order=o,
+            item=admission_item_event2,
+            variation=None,
+            price=Decimal("23"),
+            attendee_name_parts={"full_name": "Peter", "_scheme": "full"},
+            attendee_email="test@email.it",
+            secret="z3fsn8jyufm5kpk768q69gkbyr5f4h6w",
+            pseudonymization_id="ABCDEFGHKL",
+        )
+        return o

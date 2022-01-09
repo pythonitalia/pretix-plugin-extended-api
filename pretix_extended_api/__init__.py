@@ -1,6 +1,5 @@
-
-from importlib.metadata import version
 from django.utils.translation import gettext_lazy
+from importlib.metadata import version
 
 try:
     from pretix.base.plugins import PluginConfig
@@ -15,9 +14,11 @@ class PluginApp(PluginConfig):
     class PretixPluginMeta:
         name = gettext_lazy("Extended API")
         author = "Python Italia"
-        description = gettext_lazy("Extend the REST API to expose more information needed by PyCon Italia")
+        description = gettext_lazy(
+            "Extend the REST API to expose more information needed by PyCon Italia"
+        )
         visible = True
-        version = version('pretix-plugin-extended-api')
+        version = version("pretix-plugin-extended-api")
         category = "API"
         compatibility = "pretix>=2.7.0"
 

@@ -1,7 +1,7 @@
 Extended API
 ==========================
 
-This is a plugin for `pretix`_. 
+This is a plugin for `pretix`_.
 
 Short description
 
@@ -14,7 +14,7 @@ Development setup
 
 3. Activate the virtual environment you use for pretix development.
 
-4. Execute ``python setup.py develop`` within this directory to register this application with pretix's plugin registry.
+4. Execute ``poetry install`` within this directory to register this application with pretix's plugin registry.
 
 5. Execute ``make`` within this directory to compile translations.
 
@@ -38,16 +38,13 @@ You can auto-fix some of these issues by running::
     isort .
     black .
 
-To automatically check for these issues before you commit, you can run ``.install-hooks``.
+You can also fix them on your PR by commenting /fix
 
 
 License
 -------
 
-
 Copyright 2022 Python Italia
-
-Released under the terms of the Apache License 2.0
 
 
 

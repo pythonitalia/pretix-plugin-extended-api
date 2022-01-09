@@ -1,0 +1,102 @@
+name: Code Style
+
+on:
+  push:
+    branches: [ main ]
+    paths-ignore:
+      - 'pretix_extended_api/locale/**'
+      - 'pretix_extended_api/static/**'
+  pull_request:
+    branches: [ main ]
+    paths-ignore:
+      - 'pretix_extended_api/locale/**'
+      - 'pretix_extended_api/static/**'
+
+jobs:
+  isort:
+    name: isort
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up Python 3.9
+        uses: actions/setup-python@v1
+        with:
+          python-version: 3.9
+      - uses: actions/cache@v1
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('**/poetry.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
+      - name: Install pretix
+        run: pip3 install pretix
+      - name: Install Dependencies
+        run: pip3 install isort
+      - name: Run isort
+        run: isort -c .
+  flake:
+    name: flake8
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up Python 3.9
+        uses: actions/setup-python@v1
+        with:
+          python-version: 3.9
+      - uses: actions/cache@v1
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('**/poetry.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
+      - name: Install pretix
+        run: pip3 install pretix
+      - name: Install Dependencies
+        run: pip3 install flake8
+      - name: Run flake8
+        run: flake8 .
+        working-directory: .
+  black:
+    name: black
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up Python 3.9
+        uses: actions/setup-python@v1
+        with:
+          python-version: 3.9
+      - uses: actions/cache@v1
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('**/poetry.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
+      - name: Install pretix
+        run: pip3 install pretix
+      - name: Install Dependencies
+        run: pip3 install black
+      - name: Run black
+        run: black --check .
+        working-directory: .
+  docformatter:
+    name: docformatter
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up Python 3.9
+        uses: actions/setup-python@v1
+        with:
+          python-version: 3.9
+      - uses: actions/cache@v1
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('**/poetry.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
+      - name: Install pretix
+        run: pip3 install pretix
+      - name: Install Dependencies
+        run: pip3 install docformatter
+      - name: Run docformatter
+        run: docformatter --check -r .
+        working-directory: .

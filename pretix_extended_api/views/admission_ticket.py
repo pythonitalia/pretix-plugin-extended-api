@@ -18,8 +18,8 @@ class AdmissionTicketBody(serializers.Serializer):
 
 
 class AdmissionTicketViewSet(viewsets.ViewSet):
-    @action(url_path="attendee-ticket", detail=False, methods=["post"])
-    def attendee_ticket(self, request):
+    @action(url_path="has-ticket", detail=False, methods=["post"])
+    def attendee_has_ticket(self, request):
         serializer = AdmissionTicketBody(data=request.data)
         serializer.is_valid(True)
 

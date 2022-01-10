@@ -9,16 +9,7 @@ from pretix.base.models import (
     Order,
     OrderPosition,
     Organizer,
-    Question,
-    SeatingPlan,
     Team,
-)
-from pretix.base.models.orders import (
-    CartPosition,
-    OrderFee,
-    OrderPayment,
-    OrderRefund,
-    QuestionAnswer,
 )
 from pytz import UTC
 from rest_framework.test import APIClient

@@ -1,6 +1,4 @@
 from django.db.models import Q
-from functools import reduce
-from operator import or_
 from pretix.base.models import Order, OrderPosition
 from rest_framework import serializers, viewsets
 from rest_framework.decorators import action

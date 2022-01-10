@@ -1,24 +1,15 @@
 from django.db.models import Q
 from pretix.base.models import Order, OrderPosition
-from rest_framework import serializers, viewsets
+from rest_framework import viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
-
-
-class EventMetadataBody(serializers.Serializer):
-    organizer_slug = serializers.CharField(required=True)
-    event_slug = serializers.CharField(required=True)
-
-
-class AdmissionTicketBody(serializers.Serializer):
-    attendee_email = serializers.EmailField(required=True)
-    events = EventMetadataBody(many=True, required=True)
+from .serializers import HasTicketBodySerializer
 
 
 class AdmissionTicketViewSet(viewsets.ViewSet):
     @action(url_path="has-ticket", detail=False, methods=["post"])
     def attendee_has_ticket(self, request):
-        serializer = AdmissionTicketBody(data=request.data)
+        serializer = HasTicketBodySerializer(data=request.data)
         serializer.is_valid(True)
 
         attendee_email = serializer.data["attendee_email"]

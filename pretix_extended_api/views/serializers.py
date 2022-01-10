@@ -1,5 +1,6 @@
 from rest_framework import serializers
 
+
 class EventBodySerializer(serializers.Serializer):
     organizer_slug = serializers.CharField(required=True)
     event_slug = serializers.CharField(required=True)

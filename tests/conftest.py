@@ -272,7 +272,7 @@ def order_event_2(event2, admission_item_event2):
 
 @pytest.fixture
 def user():
-    return User.objects.create_user('dummy@dummy.dummy', 'dummy')
+    return User.objects.create_user("dummy@dummy.dummy", "dummy")
 
 
 @pytest.fixture

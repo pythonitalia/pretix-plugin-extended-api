@@ -27,6 +27,7 @@ def test_token_needs_ability_to_see_orders(token_client, team, event):
     )
     assert resp.status_code == 403
 
+
 def test_user_cannot_call_this_api(user_client, event):
     resp = user_client.post(
         "/api/v1/organizers/dummy/events/dummy/tickets/attendee-has-ticket/"

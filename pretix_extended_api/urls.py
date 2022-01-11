@@ -1,5 +1,5 @@
 from pretix.api.urls import event_router
 
-from .views import TestViewSet
+from .views.tickets import TicketsViewSet
 
-event_router.register("testapi", TestViewSet, basename="testapi")
+event_router.register("tickets", TicketsViewSet, basename="tickets")

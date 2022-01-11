@@ -1,4 +1,5 @@
 import pytest
+from pretix.base.models import Order
 
 pytestmark = pytest.mark.django_db
 
@@ -99,6 +100,24 @@ def test_email_has_tickets_with_multiple_events_different_organizers(
 
 
 def test_email_has_order_but_no_admission_item(token_client, event, no_admission_order):
+    resp = token_client.post(
+        "/api/v1/organizers/dummy/events/dummy/tickets/attendee-has-ticket/",
+        data={
+            "attendee_email": "test@email.it",
+            "events": [{"organizer_slug": "dummy", "event_slug": "dummy"}],
+        },
+        format="json",
+    )
+
+    assert resp.status_code == 200
+    assert resp.data["user_has_admission_ticket"] is False
+
+
+@pytest.mark.parametrize("order_status", (Order.STATUS_PENDING, Order.STATUS_EXPIRED, Order.STATUS_CANCELED))
+def test_email_should_have_a_paid_order(token_client, event, order, order_status):
+    order.status = order_status
+    order.save()
+
     resp = token_client.post(
         "/api/v1/organizers/dummy/events/dummy/tickets/attendee-has-ticket/",
         data={

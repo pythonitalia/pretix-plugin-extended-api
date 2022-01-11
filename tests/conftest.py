@@ -124,6 +124,12 @@ def admission_item(event):
 
 @pytest.fixture
 @scopes_disabled()
+def normal_item(event):
+    return event.items.create(name="Another thing", admission=False, default_price=23)
+
+
+@pytest.fixture
+@scopes_disabled()
 def admission_item_event2(event2):
     return event2.items.create(name="Budget Ticket", admission=True, default_price=23)
 
@@ -163,6 +169,51 @@ def order(event, admission_item):
         OrderPosition.objects.create(
             order=o,
             item=admission_item,
+            variation=None,
+            price=Decimal("23"),
+            attendee_name_parts={"full_name": "Peter", "_scheme": "full"},
+            attendee_email="test@email.it",
+            secret="z3fsn8jyufm5kpk768q69gkbyr5f4h6w",
+            pseudonymization_id="ABCDEFGHKL",
+        )
+        return o
+
+
+@pytest.fixture
+@scopes_disabled()
+def no_admission_order(event, normal_item):
+    testtime = datetime.datetime(2017, 12, 1, 10, 0, 0, tzinfo=UTC)
+    event.plugins += ",pretix.plugins.stripe"
+    event.save()
+
+    with mock.patch("django.utils.timezone.now") as mock_now:
+        mock_now.return_value = testtime
+        o = Order.objects.create(
+            code="FOO",
+            event=event,
+            email="dummy@dummy.test",
+            status=Order.STATUS_PAID,
+            secret="k24fiuwvu8kxz3y1",
+            datetime=datetime.datetime(2017, 12, 1, 10, 0, 0, tzinfo=UTC),
+            expires=datetime.datetime(2017, 12, 10, 10, 0, 0, tzinfo=UTC),
+            total=23,
+            locale="en",
+        )
+        o.payments.create(
+            provider="banktransfer",
+            state="pending",
+            amount=Decimal("23.00"),
+        )
+        InvoiceAddress.objects.create(
+            order=o,
+            company="Sample company",
+            country=Country("NZ"),
+            vat_id="DE123",
+            vat_id_validated=True,
+        )
+        OrderPosition.objects.create(
+            order=o,
+            item=normal_item,
             variation=None,
             price=Decimal("23"),
             attendee_name_parts={"full_name": "Peter", "_scheme": "full"},

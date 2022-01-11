@@ -18,6 +18,22 @@ def test_no_permissions_token_fails(no_permissions_token_client, event):
     assert resp.status_code == 403
 
 
+def test_token_needs_ability_to_see_orders(token_client, team, event):
+    team.can_view_orders = False
+    team.save()
+
+    resp = token_client.post(
+        "/api/v1/organizers/dummy/events/dummy/tickets/attendee-has-ticket/"
+    )
+    assert resp.status_code == 403
+
+def test_user_cannot_call_this_api(user_client, event):
+    resp = user_client.post(
+        "/api/v1/organizers/dummy/events/dummy/tickets/attendee-has-ticket/"
+    )
+    assert resp.status_code == 403
+
+
 def test_email_cannot_be_empty(token_client, event):
     resp = token_client.post(
         "/api/v1/organizers/dummy/events/dummy/tickets/attendee-has-ticket/",

@@ -10,6 +10,7 @@ from pretix.base.models import (
     OrderPosition,
     Organizer,
     Team,
+    User,
 )
 from pytz import UTC
 from rest_framework.test import APIClient
@@ -267,3 +268,20 @@ def order_event_2(event2, admission_item_event2):
             pseudonymization_id="ABCDEFGHKL",
         )
         return o
+
+
+@pytest.fixture
+def user():
+    return User.objects.create_user('dummy@dummy.dummy', 'dummy')
+
+
+@pytest.fixture
+@scopes_disabled()
+def user_client(client, team, user):
+    team.can_view_orders = True
+    team.can_view_vouchers = True
+    team.all_events = True
+    team.save()
+    team.members.add(user)
+    client.force_authenticate(user=user)
+    return client

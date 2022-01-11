@@ -106,6 +106,18 @@ def token_client(client, team):
 
 @pytest.fixture
 @scopes_disabled()
+def no_permissions_token_client(client, team):
+    team.can_view_orders = False
+    team.can_view_vouchers = False
+    team.all_events = False
+    team.save()
+    t = team.tokens.create(name="Foo")
+    client.credentials(HTTP_AUTHORIZATION="Token " + t.token)
+    return client
+
+
+@pytest.fixture
+@scopes_disabled()
 def admission_item(event):
     return event.items.create(name="Budget Ticket", admission=True, default_price=23)
 

@@ -128,7 +128,9 @@ def test_email_has_order_but_no_admission_item(token_client, event, no_admission
     assert resp.data["user_has_admission_ticket"] is False
 
 
-@pytest.mark.parametrize("order_status", (Order.STATUS_PENDING, Order.STATUS_EXPIRED, Order.STATUS_CANCELED))
+@pytest.mark.parametrize(
+    "order_status", (Order.STATUS_PENDING, Order.STATUS_EXPIRED, Order.STATUS_CANCELED)
+)
 def test_email_should_have_a_paid_order(token_client, event, order, order_status):
     order.status = order_status
     order.save()

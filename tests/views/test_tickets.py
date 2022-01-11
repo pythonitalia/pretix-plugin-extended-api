@@ -80,6 +80,21 @@ def test_email_has_tickets_but_for_different_event(token_client, event, order):
     assert resp.data["user_has_admission_ticket"] is False
 
 
+def test_email_has_no_ticket(token_client, event, order):
+    # order is for dummy, dummy
+    resp = token_client.post(
+        "/api/v1/organizers/dummy/events/dummy/tickets/attendee-has-ticket/",
+        data={
+            "attendee_email": "marco@noticket.it",
+            "events": [{"organizer_slug": "dummy", "event_slug": "dummy"}],
+        },
+        format="json",
+    )
+
+    assert resp.status_code == 200
+    assert resp.data["user_has_admission_ticket"] is False
+
+
 def test_email_has_tickets_with_multiple_events_different_organizers(
     token_client, event, event2, order_event_2
 ):

@@ -1,7 +1,7 @@
 from pretix.api.urls import router
 
-from .views.admission_ticket import AdmissionTicketViewSet
+from .views.admission_tickets import AdmissionTicketsViewSet
 
 router.register(
-    "admission-tickets", AdmissionTicketViewSet, basename="admission-tickets"
+    "admission-tickets", AdmissionTicketsViewSet, basename="admission-tickets"
 )

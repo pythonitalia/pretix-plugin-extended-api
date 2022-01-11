@@ -7,7 +7,7 @@ from rest_framework.response import Response
 from .serializers import HasTicketBodySerializer
 
 
-class AdmissionTicketViewSet(viewsets.ViewSet):
+class AdmissionTicketsViewSet(viewsets.ViewSet):
     @action(url_path="has-ticket", detail=False, methods=["post"])
     def attendee_has_ticket(self, request):
         serializer = HasTicketBodySerializer(data=request.data)

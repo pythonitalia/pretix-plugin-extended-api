@@ -4,12 +4,16 @@ pytestmark = pytest.mark.django_db
 
 
 def test_auth_required_to_check_if_email_has_ticket(client, event):
-    resp = client.post("/api/v1/organizers/dummy/events/dummy/tickets/attendee-has-ticket/")
+    resp = client.post(
+        "/api/v1/organizers/dummy/events/dummy/tickets/attendee-has-ticket/"
+    )
     assert resp.status_code == 401
 
 
 def test_no_permissions_token_fails(no_permissions_token_client, event):
-    resp = no_permissions_token_client.post("/api/v1/organizers/dummy/events/dummy/tickets/attendee-has-ticket/")
+    resp = no_permissions_token_client.post(
+        "/api/v1/organizers/dummy/events/dummy/tickets/attendee-has-ticket/"
+    )
     assert resp.status_code == 403
 
 

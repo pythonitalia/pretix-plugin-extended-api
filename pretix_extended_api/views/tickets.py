@@ -1,9 +1,9 @@
 from django.db.models import Q
+from django_scopes import scopes_disabled
 from pretix.base.models import Order, OrderPosition, TeamAPIToken
 from rest_framework import viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
-from django_scopes import scopes_disabled
 
 from .serializers import AttendeeHasTicketBodySerializer
 
@@ -17,7 +17,9 @@ class TicketsViewSet(viewsets.ViewSet):
     def attendee_has_ticket(self, request, **kwargs):
         # Only allow Team API tokens to call this API.
         perm_holder = request.auth if isinstance(request.auth, TeamAPIToken) else None
-        if not perm_holder or not perm_holder.has_event_permission(request.event.organizer, request.event, 'can_view_orders'):
+        if not perm_holder or not perm_holder.has_event_permission(
+            request.event.organizer, request.event, "can_view_orders"
+        ):
             raise PermissionError()
 
         serializer = AttendeeHasTicketBodySerializer(data=request.data)

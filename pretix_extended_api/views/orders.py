@@ -1,8 +1,7 @@
+from pretix.api.serializers.order import OrderSerializer
+from pretix.api.views.order import OrderViewSet
 from pretix.base.models import TeamAPIToken
 from rest_framework import exceptions, viewsets
-from rest_framework.response import Response
-from pretix.api.views.order import OrderViewSet
-from pretix.api.serializers.order import OrderSerializer
 from rest_framework.response import Response
 
 
@@ -15,7 +14,7 @@ class OrdersViewSet(viewsets.ViewSet):
         ):
             raise exceptions.PermissionDenied()
 
-        codes = pk.split(',')
+        codes = pk.split(",")
         qs = OrderViewSet(request=request).get_queryset()
         orders = qs.filter(code__in=codes)
 
@@ -23,8 +22,8 @@ class OrdersViewSet(viewsets.ViewSet):
             instance=orders,
             many=True,
             context={
-                'request': request,
-                'event': request.event,
-            }
+                "request": request,
+                "event": request.event,
+            },
         )
         return Response(serializer.data)

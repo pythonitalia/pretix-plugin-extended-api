@@ -57,7 +57,7 @@ def test_with_not_existent_order_code(token_client, event, order):
     order.save()
 
     resp = token_client.get(
-        f"/api/v1/organizers/dummy/events/dummy/extended-orders/ABCABC/",
+        "/api/v1/organizers/dummy/events/dummy/extended-orders/ABCABC/",
         format="json",
     )
 
@@ -71,7 +71,7 @@ def test_needs_permissions(no_permissions_token_client, event, order):
     order.save()
 
     resp = no_permissions_token_client.get(
-        f"/api/v1/organizers/dummy/events/dummy/extended-orders/FOO/",
+        "/api/v1/organizers/dummy/events/dummy/extended-orders/FOO/",
         format="json",
     )
 
@@ -84,7 +84,7 @@ def test_user_token_is_not_allowed(user_client, event, order):
     order.save()
 
     resp = user_client.get(
-        f"/api/v1/organizers/dummy/events/dummy/extended-orders/FOO/",
+        "/api/v1/organizers/dummy/events/dummy/extended-orders/FOO/",
         format="json",
     )
 
@@ -97,7 +97,7 @@ def test_needs_authentication(client, event, order):
     order.save()
 
     resp = client.get(
-        f"/api/v1/organizers/dummy/events/dummy/extended-orders/FOO/",
+        "/api/v1/organizers/dummy/events/dummy/extended-orders/FOO/",
         format="json",
     )
 

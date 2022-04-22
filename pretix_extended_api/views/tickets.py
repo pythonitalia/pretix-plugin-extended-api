@@ -1,11 +1,21 @@
 from django.db.models import Q
 from django_scopes import scopes_disabled
+from pretix.api.serializers.item import ItemSerializer
 from pretix.base.models import Order, OrderPosition, TeamAPIToken
 from rest_framework import exceptions, viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
 
 from .serializers import AttendeeHasTicketBodySerializer
+
+
+def check_permission(request, permission):
+    # Only allow Team API tokens to call this API.
+    perm_holder = request.auth if isinstance(request.auth, TeamAPIToken) else None
+    if not perm_holder or not perm_holder.has_event_permission(
+        request.event.organizer, request.event, permission
+    ):
+        raise exceptions.PermissionDenied()
 
 
 class TicketsViewSet(viewsets.ViewSet):
@@ -15,12 +25,7 @@ class TicketsViewSet(viewsets.ViewSet):
     @scopes_disabled()
     @action(url_path="attendee-has-ticket", detail=False, methods=["post"])
     def attendee_has_ticket(self, request, **kwargs):
-        # Only allow Team API tokens to call this API.
-        perm_holder = request.auth if isinstance(request.auth, TeamAPIToken) else None
-        if not perm_holder or not perm_holder.has_event_permission(
-            request.event.organizer, request.event, "can_view_orders"
-        ):
-            raise exceptions.PermissionDenied()
+        check_permission(request, "can_view_orders")
 
         serializer = AttendeeHasTicketBodySerializer(data=request.data)
         serializer.is_valid(True)
@@ -46,3 +51,43 @@ class TicketsViewSet(viewsets.ViewSet):
 
         qs = qs.filter(events_filter)
         return Response({"user_has_admission_ticket": qs.exists()})
+
+    @scopes_disabled()
+    @action(url_path="attendee-tickets", detail=False, methods=["get"])
+    def attendee_tickets(self, request, **kwargs):
+        check_permission(request, "can_view_orders")
+
+        serializer = AttendeeHasTicketBodySerializer(data=request.data)
+        serializer.is_valid(True)
+
+        attendee_email = serializer.data["attendee_email"]
+        events = serializer.data["events"]
+
+        if not events:
+            return Response([])
+
+        qs = OrderPosition.objects.filter(
+            attendee_email=attendee_email,
+            order__status=Order.STATUS_PAID,
+            item__admission=True,
+        )
+
+        events_filter = Q()
+        for event in events:
+            events_filter |= Q(
+                order__event__slug=event["event_slug"],
+                order__event__organizer__slug=event["organizer_slug"],
+            )
+
+        qs = qs.filter(events_filter)
+        items = [o.item for o in qs]
+
+        serializer = ItemSerializer(
+            instance=items,
+            many=True,
+            context={
+                "request": request,
+                "event": request.event,
+            },
+        )
+        return Response(serializer.data)

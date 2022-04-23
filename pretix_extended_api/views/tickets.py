@@ -55,7 +55,6 @@ class TicketsViewSet(viewsets.ViewSet):
         qs = qs.filter(events_filter)
         return Response({"user_has_admission_ticket": qs.exists()})
 
-    @scopes_disabled()
     @action(url_path="attendee-tickets", detail=False, methods=["get"])
     def attendee_tickets(self, request, *args, **kwargs):
         check_permission(request, "can_view_orders")

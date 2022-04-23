@@ -96,7 +96,6 @@ def test_email_tickets_filter_by_event(
         "/api/v1/organizers/dummy/events/dummy/tickets/attendee-tickets/",
         data={
             "attendee_email": "test@email.it",
-            "events": [{"organizer_slug": "dummy", "event_slug": "dummy"}],
         },
         format="json",
     )

@@ -16,8 +16,6 @@ class AttendeeHasTicketBodySerializer(serializers.Serializer):
 
 class AttendeeTicketBodySerializer(serializers.Serializer):
     attendee_email = serializers.EmailField(required=True)
-    events = EventBodySerializer(many=True, required=False)
-
 
 
 class AnswerSerializer(I18nAwareModelSerializer):

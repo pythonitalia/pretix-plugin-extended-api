@@ -1,12 +1,15 @@
 from django.db.models import Q
 from django_scopes import scopes_disabled
-from pretix.api.serializers.order import OrderPositionSerializer
 from pretix.base.models import Order, OrderPosition, TeamAPIToken
 from rest_framework import exceptions, viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
 
-from .serializers import AttendeeHasTicketBodySerializer, AttendeeTicketBodySerializer
+from .serializers import (
+    AttendeeHasTicketBodySerializer,
+    AttendeeTicketBodySerializer,
+    OrderPositionSerializer,
+)
 
 
 def check_permission(request, permission):
@@ -67,27 +70,12 @@ class TicketsViewSet(viewsets.ViewSet):
             order__status=Order.STATUS_PAID,
             item__admission=True,
         )
-
-        items = []
-        for order_position in qs:
-            item = {
-                "price": str(order_position.price),
-                "item": {
-                    "name": order_position.item.name.data,
-                    "id": order_position.item.id,
-                },
-                "answers": [
-                    {
-                        "question_id": a.question.id,
-                        "answer": a.answer,
-                        "options": [
-                            {"identifier": o.identifier, "answer": o.answer.data}
-                            for o in a.question.options.all()
-                        ],
-                        "question": a.question.question.data,
-                    }
-                    for a in order_position.answers.all()
-                ],
-            }
-            items.append(item)
-        return Response(items)
+        serializer = OrderPositionSerializer(
+            instance=qs,
+            many=True,
+            context={
+                "request": request,
+                "event": request.event,
+            },
+        )
+        return Response(serializer.data)

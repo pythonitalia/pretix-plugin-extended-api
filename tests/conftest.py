@@ -65,11 +65,15 @@ def event(organizer, meta_prop):
 @scopes_disabled()
 def event_question(event):
     q = Question.objects.create(
-        question="Tagline", type=Question.TYPE_TEXT, event=event
+        question=LazyI18nString({"en": "Tagline", "it": "Descrizione"}),
+        type=Question.TYPE_TEXT,
+        event=event,
     )
     q1 = Question.objects.create(
         event=event,
-        question="What do you eat?",
+        question=LazyI18nString(
+            {"en": "What do you want to eat?", "it": "'Sa magnet?!?! "}
+        ),
         type=Question.TYPE_CHOICE,
         required=True,
     )

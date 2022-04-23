@@ -66,9 +66,12 @@ def test_email_tickets(token_client, event, order):
     assert resp.status_code == 200
     assert resp.data[0]["item"]["name"]["en"] == "Budget Ticket"
     assert resp.data[0]["price"] == "23.00"
-    assert resp.data[0]["answers"][0]["question"] == "Tagline"
+    assert resp.data[0]["answers"][0]["question"]["question"]["en"] == "Tagline"
     assert resp.data[0]["answers"][0]["answer"] == "PySushi"
-    assert resp.data[0]["answers"][1]["question"] == "What do you eat?"
+    assert (
+        resp.data[0]["answers"][1]["question"]["question"]["en"]
+        == "What do you want to eat?"
+    )
     assert resp.data[0]["answers"][1]["answer"] == "Fiorentina"
 
 

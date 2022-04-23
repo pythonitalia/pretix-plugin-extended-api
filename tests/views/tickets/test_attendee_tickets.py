@@ -89,22 +89,6 @@ def test_email_has_no_ticket(token_client, event, order):
     assert resp.data == []
 
 
-def test_email_has_tickets_with_multiple_events_different_organizers(
-    token_client, event, event2, order_event_2
-):
-    resp = token_client.get(
-        "/api/v1/organizers/dummy/events/dummy/tickets/attendee-tickets/",
-        data={
-            "attendee_email": "test@email.it",
-        },
-        format="json",
-    )
-
-    assert resp.status_code == 200
-    assert resp.data[0]["item"]["name"]["en"] == "Budget Ticket"
-    assert resp.data[0]["price"] == "23.00"
-
-
 def test_email_has_order_but_no_admission_item(token_client, event, no_admission_order):
     resp = token_client.get(
         "/api/v1/organizers/dummy/events/dummy/tickets/attendee-tickets/",

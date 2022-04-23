@@ -3,12 +3,14 @@ import pytest
 from decimal import Decimal
 from django_countries.fields import Country
 from django_scopes import scopes_disabled
+from i18nfield.strings import LazyI18nString
 from pretix.base.models import (
     Event,
     InvoiceAddress,
     Order,
     OrderPosition,
     Organizer,
+    Question,
     Team,
     User,
 )
@@ -45,7 +47,7 @@ def organizer2():
 def event(organizer, meta_prop):
     e = Event.objects.create(
         organizer=organizer,
-        name="Dummy",
+        name=LazyI18nString({"en": "Dummy", "it": "Prova"}),
         slug="dummy",
         date_from=datetime.datetime(2017, 12, 27, 10, 0, 0, tzinfo=UTC),
         plugins="pretix_extended_api",
@@ -54,7 +56,26 @@ def event(organizer, meta_prop):
     e.meta_values.create(property=meta_prop, value="Conference")
     e.item_meta_properties.create(name="day", default="Monday")
     e.settings.timezone = "Europe/Berlin"
+    e.settings.locales = ["en", "it"]
+
     return e
+
+
+@pytest.fixture
+@scopes_disabled()
+def event_question(event):
+    q = Question.objects.create(
+        question="Tagline", type=Question.TYPE_TEXT, event=event
+    )
+    q1 = Question.objects.create(
+        event=event,
+        question="What do you eat?",
+        type=Question.TYPE_CHOICE,
+        required=True,
+    )
+    q1.options.create(answer="Sushi", identifier="Sushi")
+    q1.options.create(answer="Fiorentina", identifier="Fiorentina")
+    return event, [q, q1]
 
 
 @pytest.fixture
@@ -120,7 +141,11 @@ def no_permissions_token_client(client, team):
 @pytest.fixture
 @scopes_disabled()
 def admission_item(event):
-    return event.items.create(name="Budget Ticket", admission=True, default_price=23)
+    return event.items.create(
+        name=LazyI18nString({"en": "Budget Ticket", "it": "Biglietto Economico"}),
+        admission=True,
+        default_price=23,
+    )
 
 
 @pytest.fixture
@@ -132,12 +157,17 @@ def normal_item(event):
 @pytest.fixture
 @scopes_disabled()
 def admission_item_event2(event2):
-    return event2.items.create(name="Budget Ticket", admission=True, default_price=23)
+    return event2.items.create(
+        name=LazyI18nString({"en": "Budget Ticket", "it": "Biglietto Economico"}),
+        admission=True,
+        default_price=23,
+    )
 
 
 @pytest.fixture
 @scopes_disabled()
-def order(event, admission_item):
+def order(event_question, admission_item):
+    event, questions = event_question
     testtime = datetime.datetime(2017, 12, 1, 10, 0, 0, tzinfo=UTC)
     event.plugins += ",pretix.plugins.stripe"
     event.save()
@@ -167,7 +197,7 @@ def order(event, admission_item):
             vat_id="DE123",
             vat_id_validated=True,
         )
-        OrderPosition.objects.create(
+        op = OrderPosition.objects.create(
             order=o,
             item=admission_item,
             variation=None,
@@ -177,6 +207,8 @@ def order(event, admission_item):
             secret="z3fsn8jyufm5kpk768q69gkbyr5f4h6w",
             pseudonymization_id="ABCDEFGHKL",
         )
+        op.answers.create(question=questions[0], answer="PySushi")
+        op.answers.create(question=questions[1], answer="Fiorentina")
         return o
 
 

@@ -9,3 +9,7 @@ class EventBodySerializer(serializers.Serializer):
 class AttendeeHasTicketBodySerializer(serializers.Serializer):
     attendee_email = serializers.EmailField(required=True)
     events = EventBodySerializer(many=True, required=True)
+
+
+class AttendeeTicketBodySerializer(serializers.Serializer):
+    attendee_email = serializers.EmailField(required=True)

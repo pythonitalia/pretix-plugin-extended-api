@@ -1,5 +1,4 @@
 import pytest
-from pretix.base.models import Order
 
 pytestmark = pytest.mark.django_db
 
@@ -36,34 +35,23 @@ def test_user_cannot_call_this_api(user_client, event):
 def test_email_cannot_be_empty(token_client, event):
     resp = token_client.get(
         "/api/v1/organizers/dummy/events/dummy/tickets/attendee-tickets/",
-        data={"attendee_email": "", "events": []},
+        data={"attendee_email": ""},
         format="json",
     )
 
     assert resp.status_code == 400
-    assert resp.data["attendee_email"][0].code == "required"
+    assert resp.data["attendee_email"][0].code == "blank"
 
 
 def test_email_cannot_be_invalid(token_client, event):
     resp = token_client.get(
         "/api/v1/organizers/dummy/events/dummy/tickets/attendee-tickets/",
-        data={"attendee_email": "SELECT id FROM sushi; --", "events": []},
+        data={"attendee_email": "SELECT id FROM sushi; --"},
         format="json",
     )
 
     assert resp.status_code == 400
-    assert resp.data["attendee_email"][0].code == "required"
-
-
-def test_email_tickets_with_no_events(token_client, event):
-    resp = token_client.get(
-        "/api/v1/organizers/dummy/events/dummy/tickets/attendee-tickets/",
-        data={"attendee_email": "test@email.it", "events": []},
-        format="json",
-    )
-
-    assert resp.status_code == 200
-    assert resp.data == []
+    assert resp.data["attendee_email"][0].code == "invalid"
 
 
 def test_email_tickets(token_client, event, order):
@@ -71,28 +59,17 @@ def test_email_tickets(token_client, event, order):
         "/api/v1/organizers/dummy/events/dummy/tickets/attendee-tickets/",
         data={
             "attendee_email": "test@email.it",
-            "events": [{"organizer_slug": "dummy", "event_slug": "dummy"}],
         },
         format="json",
     )
 
     assert resp.status_code == 200
-    assert resp.data["user_has_admission_ticket"] is True
-
-
-def test_email_tickets_but_for_different_event(token_client, event, order):
-    # order is for dummy, dummy
-    resp = token_client.get(
-        "/api/v1/organizers/dummy/events/dummy/tickets/attendee-tickets/",
-        data={
-            "attendee_email": "test@email.it",
-            "events": [{"organizer_slug": "python-italia", "event_slug": "pycon-10"}],
-        },
-        format="json",
-    )
-
-    assert resp.status_code == 200
-    assert resp.data["user_has_admission_ticket"] is False
+    assert resp.data[0]["item"]["name"]["en"] == "Budget Ticket"
+    assert resp.data[0]["price"] == "23.00"
+    assert resp.data[0]["answers"][0]["question"] == "Tagline"
+    assert resp.data[0]["answers"][0]["answer"] == "PySushi"
+    assert resp.data[0]["answers"][1]["question"] == "What do you eat?"
+    assert resp.data[0]["answers"][1]["answer"] == "Fiorentina"
 
 
 def test_email_has_no_ticket(token_client, event, order):
@@ -101,13 +78,12 @@ def test_email_has_no_ticket(token_client, event, order):
         "/api/v1/organizers/dummy/events/dummy/tickets/attendee-tickets/",
         data={
             "attendee_email": "marco@noticket.it",
-            "events": [{"organizer_slug": "dummy", "event_slug": "dummy"}],
         },
         format="json",
     )
 
     assert resp.status_code == 200
-    assert resp.data["user_has_admission_ticket"] is False
+    assert resp.data == []
 
 
 def test_email_has_tickets_with_multiple_events_different_organizers(
@@ -117,16 +93,13 @@ def test_email_has_tickets_with_multiple_events_different_organizers(
         "/api/v1/organizers/dummy/events/dummy/tickets/attendee-tickets/",
         data={
             "attendee_email": "test@email.it",
-            "events": [
-                {"organizer_slug": "dummy", "event_slug": "dummy"},
-                {"organizer_slug": "python-italia", "event_slug": "smart"},
-            ],
         },
         format="json",
     )
 
     assert resp.status_code == 200
-    assert resp.data["user_has_admission_ticket"] is True
+    assert resp.data[0]["item"]["name"]["en"] == "Budget Ticket"
+    assert resp.data[0]["price"] == "23.00"
 
 
 def test_email_has_order_but_no_admission_item(token_client, event, no_admission_order):
@@ -134,30 +107,9 @@ def test_email_has_order_but_no_admission_item(token_client, event, no_admission
         "/api/v1/organizers/dummy/events/dummy/tickets/attendee-tickets/",
         data={
             "attendee_email": "test@email.it",
-            "events": [{"organizer_slug": "dummy", "event_slug": "dummy"}],
         },
         format="json",
     )
 
     assert resp.status_code == 200
-    assert resp.data["user_has_admission_ticket"] is False
-
-
-@pytest.mark.parametrize(
-    "order_status", (Order.STATUS_PENDING, Order.STATUS_EXPIRED, Order.STATUS_CANCELED)
-)
-def test_email_should_have_a_paid_order(token_client, event, order, order_status):
-    order.status = order_status
-    order.save()
-
-    resp = token_client.get(
-        "/api/v1/organizers/dummy/events/dummy/tickets/attendee-tickets/",
-        data={
-            "attendee_email": "test@email.it",
-            "events": [{"organizer_slug": "dummy", "event_slug": "dummy"}],
-        },
-        format="json",
-    )
-
-    assert resp.status_code == 200
-    assert resp.data["user_has_admission_ticket"] is False
+    assert resp.data == []

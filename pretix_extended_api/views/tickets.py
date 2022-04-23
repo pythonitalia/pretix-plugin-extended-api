@@ -69,7 +69,7 @@ class TicketsViewSet(viewsets.ViewSet):
             order__status=Order.STATUS_PAID,
             item__admission=True,
             order__event__slug=request.event.slug,
-            order__event__organizer__slug=request.organizer.slug
+            order__event__organizer__slug=request.organizer.slug,
         )
 
         serializer = OrderPositionSerializer(

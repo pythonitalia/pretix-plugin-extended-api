@@ -162,7 +162,7 @@ def normal_item(event):
 @scopes_disabled()
 def admission_item_event2(event2):
     return event2.items.create(
-        name=LazyI18nString({"en": "Budget Ticket", "it": "Biglietto Economico"}),
+        name=LazyI18nString({"en": "Pricy Ticket", "it": "Biglietto Costoso"}),
         admission=True,
         default_price=23,
     )
@@ -297,11 +297,11 @@ def order_event_2(event2, admission_item_event2):
             order=o,
             item=admission_item_event2,
             variation=None,
-            price=Decimal("23"),
+            price=Decimal("54"),
             attendee_name_parts={"full_name": "Peter", "_scheme": "full"},
             attendee_email="test@email.it",
             secret="z3fsn8jyufm5kpk768q69gkbyr5f4h6w",
-            pseudonymization_id="ABCDEFGHKL",
+            pseudonymization_id="MNOPQRSTUV",
         )
         return o
 

@@ -89,6 +89,24 @@ def test_email_has_no_ticket(token_client, event, order):
     assert resp.data == []
 
 
+def test_email_tickets_filter_by_event(
+    token_client, event, event2, order, order_event_2
+):
+    resp = token_client.get(
+        "/api/v1/organizers/dummy/events/dummy/tickets/attendee-tickets/",
+        data={
+            "attendee_email": "test@email.it",
+            "events": [{"organizer_slug": "dummy", "event_slug": "dummy"}],
+        },
+        format="json",
+    )
+
+    assert resp.status_code == 200
+    assert len(resp.data) == 1
+    assert resp.data[0]["item"]["name"]["en"] == "Budget Ticket"
+    assert resp.data[0]["price"] == "23.00"
+
+
 def test_email_has_order_but_no_admission_item(token_client, event, no_admission_order):
     resp = token_client.get(
         "/api/v1/organizers/dummy/events/dummy/tickets/attendee-tickets/",

@@ -63,12 +63,23 @@ class TicketsViewSet(viewsets.ViewSet):
         serializer.is_valid(True)
 
         attendee_email = serializer.data["attendee_email"]
+        events = serializer.data.get("events", [])
 
         qs = OrderPosition.objects.filter(
             attendee_email=attendee_email,
             order__status=Order.STATUS_PAID,
             item__admission=True,
         )
+
+        events_filter = Q()
+        for event in events:
+            events_filter |= Q(
+                order__event__slug=event["event_slug"],
+                order__event__organizer__slug=event["organizer_slug"],
+            )
+
+        qs = qs.filter(events_filter)
+
         serializer = OrderPositionSerializer(
             instance=qs,
             many=True,

@@ -117,3 +117,16 @@ def test_email_has_order_but_no_admission_item(token_client, event, no_admission
 
     assert resp.status_code == 200
     assert resp.data == []
+
+
+def test_email_tickets_is_case_insensitive(token_client, event, order):
+    resp = token_client.get(
+        "/api/v1/organizers/dummy/events/dummy/tickets/attendee-tickets/",
+        data={
+            "attendee_email": "TeSt@email.it",
+        },
+        format="json",
+    )
+
+    assert resp.status_code == 200
+    assert len(resp.data) == 1

@@ -163,3 +163,17 @@ def test_email_should_have_a_paid_order(token_client, event, order, order_status
 
     assert resp.status_code == 200
     assert resp.data["user_has_admission_ticket"] is False
+
+
+def test_email_match_is_case_insensitive(token_client, event, order):
+    resp = token_client.post(
+        "/api/v1/organizers/dummy/events/dummy/tickets/attendee-has-ticket/",
+        data={
+            "attendee_email": "TeSt@email.it",
+            "events": [{"organizer_slug": "dummy", "event_slug": "dummy"}],
+        },
+        format="json",
+    )
+
+    assert resp.status_code == 200
+    assert resp.data["user_has_admission_ticket"] is True

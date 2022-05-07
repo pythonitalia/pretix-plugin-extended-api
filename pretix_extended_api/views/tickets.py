@@ -40,7 +40,7 @@ class TicketsViewSet(viewsets.ViewSet):
             return Response({"user_has_admission_ticket": False})
 
         qs = OrderPosition.objects.filter(
-            attendee_email=attendee_email,
+            attendee_email__iexact=attendee_email,
             order__status=Order.STATUS_PAID,
             item__admission=True,
         )
@@ -65,7 +65,7 @@ class TicketsViewSet(viewsets.ViewSet):
         attendee_email = serializer.data["attendee_email"]
 
         qs = OrderPosition.objects.filter(
-            attendee_email=attendee_email,
+            attendee_email__iexact=attendee_email,
             order__status=Order.STATUS_PAID,
             item__admission=True,
             order__event__slug=request.event.slug,

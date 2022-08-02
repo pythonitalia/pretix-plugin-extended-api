@@ -321,3 +321,35 @@ def user_client(client, team, user):
     team.members.add(user)
     client.force_authenticate(user=user)
     return client
+
+
+@pytest.fixture
+@scopes_disabled()
+def voucher_for_item(event, admission_item):
+    return event.vouchers.create(
+        item=admission_item, price_mode="set", value=12, tag="Foo"
+    )
+
+
+@pytest.fixture
+@scopes_disabled()
+def voucher_for_quota(event, quota):
+    return event.vouchers.create(
+        item=None, quota=quota, price_mode="set", value=12, tag="Foo"
+    )
+
+
+@pytest.fixture
+@scopes_disabled()
+def voucher_for_all_items(event):
+    return event.vouchers.create(
+        item=None, quota=None, price_mode="set", value=12, tag="Foo"
+    )
+
+
+@pytest.fixture
+@scopes_disabled()
+def quota(event, admission_item):
+    q = event.quotas.create(name="Budget Quota", size=200)
+    q.items.add(admission_item)
+    return q

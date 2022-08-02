@@ -1,18 +1,14 @@
 from pretix.api.serializers.order import OrderSerializer
 from pretix.api.views.order import OrderViewSet
-from pretix.base.models import TeamAPIToken
-from rest_framework import exceptions, viewsets
+from rest_framework import viewsets
 from rest_framework.response import Response
+
+from .permissions import check_permission
 
 
 class OrdersViewSet(viewsets.ViewSet):
     def retrieve(self, request, pk: str, **kwargs):
-        # Only allow Team API tokens to call this API.
-        perm_holder = request.auth if isinstance(request.auth, TeamAPIToken) else None
-        if not perm_holder or not perm_holder.has_event_permission(
-            request.event.organizer, request.event, "can_view_orders"
-        ):
-            raise exceptions.PermissionDenied()
+        check_permission(request, "can_view_orders")
 
         codes = pk.split(",")
         qs = OrderViewSet(request=request).get_queryset()

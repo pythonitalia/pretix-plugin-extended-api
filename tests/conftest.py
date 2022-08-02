@@ -13,7 +13,7 @@ from pretix.base.models import (
     Question,
     Team,
     User,
-    Voucher
+    Voucher,
 )
 from pytz import UTC
 from rest_framework.test import APIClient
@@ -327,19 +327,25 @@ def user_client(client, team, user):
 @pytest.fixture
 @scopes_disabled()
 def voucher_for_item(event, admission_item):
-    return event.vouchers.create(item=admission_item, price_mode='set', value=12, tag='Foo')
+    return event.vouchers.create(
+        item=admission_item, price_mode="set", value=12, tag="Foo"
+    )
 
 
 @pytest.fixture
 @scopes_disabled()
 def voucher_for_quota(event, quota):
-    return event.vouchers.create(item=None, quota=quota, price_mode='set', value=12, tag='Foo')
+    return event.vouchers.create(
+        item=None, quota=quota, price_mode="set", value=12, tag="Foo"
+    )
 
 
 @pytest.fixture
 @scopes_disabled()
 def voucher_for_all_items(event):
-    return event.vouchers.create(item=None, quota=None, price_mode='set', value=12, tag='Foo')
+    return event.vouchers.create(
+        item=None, quota=None, price_mode="set", value=12, tag="Foo"
+    )
 
 
 @pytest.fixture

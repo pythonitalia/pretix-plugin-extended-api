@@ -71,7 +71,7 @@ class ExtendedVoucherSerializer(VoucherSerializer):
         if not instance.quota_id:
             return None
 
-        return list(instance.quota.items.values_list('id', flat=True))
+        return list(instance.quota.items.values_list("id", flat=True))
 
     class Meta(VoucherSerializer.Meta):
-        fields = VoucherSerializer.Meta.fields + ('quota_items',)
+        fields = VoucherSerializer.Meta.fields + ("quota_items",)

@@ -10,10 +10,10 @@ def test_voucher_info_for_item(token_client, admission_item, voucher_for_item):
     )
 
     assert resp.status_code == 200
-    assert resp.data['id'] == voucher_for_item.id
-    assert resp.data['item'] == admission_item.id
-    assert resp.data['quota'] is None
-    assert resp.data['quota_items'] is None
+    assert resp.data["id"] == voucher_for_item.id
+    assert resp.data["item"] == admission_item.id
+    assert resp.data["quota"] is None
+    assert resp.data["quota_items"] is None
 
 
 def test_quota_voucher_info(token_client, admission_item, quota, voucher_for_quota):
@@ -23,10 +23,10 @@ def test_quota_voucher_info(token_client, admission_item, quota, voucher_for_quo
     )
 
     assert resp.status_code == 200
-    assert resp.data['id'] == voucher_for_quota.id
-    assert resp.data['item'] is None
-    assert resp.data['quota'] == quota.id
-    assert resp.data['quota_items'] == [admission_item.id]
+    assert resp.data["id"] == voucher_for_quota.id
+    assert resp.data["item"] is None
+    assert resp.data["quota"] == quota.id
+    assert resp.data["quota_items"] == [admission_item.id]
 
 
 def test_voucher_for_all_items(token_client, voucher_for_all_items):
@@ -36,10 +36,10 @@ def test_voucher_for_all_items(token_client, voucher_for_all_items):
     )
 
     assert resp.status_code == 200
-    assert resp.data['id'] == voucher_for_all_items.id
-    assert resp.data['item'] is None
-    assert resp.data['quota'] is None
-    assert resp.data['quota_items'] is None
+    assert resp.data["id"] == voucher_for_all_items.id
+    assert resp.data["item"] is None
+    assert resp.data["quota"] is None
+    assert resp.data["quota_items"] is None
 
 
 def test_invalid_code(token_client, voucher_for_all_items):
@@ -68,6 +68,7 @@ def test_requires_authentication_of_team(user_client, voucher_for_all_items):
     )
 
     assert resp.status_code == 403
+
 
 def test_requires_permissions(no_permissions_token_client, voucher_for_all_items):
     resp = no_permissions_token_client.get(

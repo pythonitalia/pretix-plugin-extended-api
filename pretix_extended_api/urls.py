@@ -6,4 +6,6 @@ from .views.vouchers import VouchersViewSet
 
 event_router.register("tickets", TicketsViewSet, basename="tickets")
 event_router.register("extended-orders", OrdersViewSet, basename="extended-orders")
-event_router.register("extended-vouchers", VouchersViewSet, basename="extended-vouchers")
+event_router.register(
+    "extended-vouchers", VouchersViewSet, basename="extended-vouchers"
+)

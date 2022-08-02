@@ -2,7 +2,9 @@ from pretix.api.serializers.order import OrderSerializer
 from pretix.api.views.order import OrderViewSet
 from rest_framework import viewsets
 from rest_framework.response import Response
+
 from .permissions import check_permission
+
 
 class OrdersViewSet(viewsets.ViewSet):
     def retrieve(self, request, pk: str, **kwargs):

@@ -1,6 +1,7 @@
 from pretix.base.models import TeamAPIToken
 from rest_framework import exceptions
 
+
 def check_permission(request, permission):
     # Only allow Team API tokens to call this API.
     perm_holder = request.auth if isinstance(request.auth, TeamAPIToken) else None

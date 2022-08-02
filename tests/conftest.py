@@ -13,7 +13,6 @@ from pretix.base.models import (
     Question,
     Team,
     User,
-    Voucher,
 )
 from pytz import UTC
 from rest_framework.test import APIClient

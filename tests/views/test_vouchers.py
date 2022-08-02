@@ -1,3 +1,5 @@
+from datetime import timedelta
+from django.utils import timezone
 import pytest
 
 pytestmark = pytest.mark.django_db
@@ -44,7 +46,7 @@ def test_voucher_for_all_items(token_client, voucher_for_all_items):
 
 def test_invalid_code(token_client, voucher_for_all_items):
     resp = token_client.get(
-        f"/api/v1/organizers/dummy/events/dummy/extended-vouchers/ABCABCABC/",
+        "/api/v1/organizers/dummy/events/dummy/extended-vouchers/ABCABCABC/",
         format="json",
     )
 
@@ -77,3 +79,28 @@ def test_requires_permissions(no_permissions_token_client, voucher_for_all_items
     )
 
     assert resp.status_code == 403
+
+
+def test_expired_voucher_is_not_returned(token_client, voucher_for_item):
+    voucher_for_item.valid_until = timezone.now() - timedelta(days=50)
+    voucher_for_item.save()
+
+    resp = token_client.get(
+        f"/api/v1/organizers/dummy/events/dummy/extended-vouchers/{voucher_for_item.code}/",
+        format="json",
+    )
+
+    assert resp.status_code == 404
+
+
+def test_used_voucher_is_not_returned(token_client, voucher_for_item):
+    voucher_for_item.redeemed = 1
+    voucher_for_item.max_usages = 1
+    voucher_for_item.save()
+
+    resp = token_client.get(
+        f"/api/v1/organizers/dummy/events/dummy/extended-vouchers/{voucher_for_item.code}/",
+        format="json",
+    )
+
+    assert resp.status_code == 404

@@ -23,7 +23,7 @@ class TicketsViewSet(viewsets.ViewSet):
         check_permission(request, "can_view_orders")
 
         serializer = AttendeeHasTicketBodySerializer(data=request.data)
-        serializer.is_valid(True)
+        serializer.is_valid(raise_exception=True)
 
         attendee_email = serializer.data["attendee_email"]
         events = serializer.data["events"]
@@ -52,16 +52,20 @@ class TicketsViewSet(viewsets.ViewSet):
         check_permission(request, "can_view_orders")
 
         serializer = AttendeeTicketBodySerializer(data=request.query_params)
-        serializer.is_valid(True)
+        serializer.is_valid(raise_exception=True)
 
         attendee_email = serializer.data["attendee_email"]
 
-        qs = OrderPosition.objects.filter(
-            attendee_email__iexact=attendee_email,
-            order__status=Order.STATUS_PAID,
-            item__admission=True,
-            order__event__slug=request.event.slug,
-            order__event__organizer__slug=request.organizer.slug,
+        qs = (
+            OrderPosition.objects.filter(
+                Q(attendee_email__iexact=attendee_email)
+                | Q(order__email__iexact=attendee_email),
+                order__status=Order.STATUS_PAID,
+                order__event__slug=request.event.slug,
+                order__event__organizer__slug=request.organizer.slug,
+            )
+            .order_by("-item__admission")
+            .prefetch_related("item")
         )
 
         serializer = OrderPositionSerializer(

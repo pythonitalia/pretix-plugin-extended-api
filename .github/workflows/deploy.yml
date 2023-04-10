@@ -30,8 +30,8 @@ jobs:
         uses: actions/setup-python@v2
         with:
           python-version: 3.9
-      - name: Install poetry
-        run: pip install poetry
+      - name: Install pdm
+        run: pip install pdm
       - name: Metadata
         id: metadata
         run: echo "::set-output name=commit::$(git rev-parse HEAD)"
@@ -58,33 +58,38 @@ jobs:
 
             Releasing commit [${{ steps.metadata.outputs.commit }}] to PyPi as pre-release! :package:
           edit-mode: replace
+      - name: Install pdm-manage-version
+        run: pdm plugin add pdm-manage-version
       - name: Update version
         if: ${{ github.ref == 'refs/heads/main' }}
-        run: poetry version patch
+        run: pdm version patch
       - name: Update to pre-release version
         if: ${{ github.ref != 'refs/heads/main' }}
         run: |
-          poetry version patch
-          poetry version $(poetry version -s)-dev.$(date '+%s')
+          pdm version patch
+          current_version=$(pdm version)
+          pdm version $current_version-dev.$(date '+%s')
       - name: Build & Publish
         id: release
         env:
-          POETRY_PYPI_TOKEN_PYPI: ${{ secrets.PYPI_TOKEN }}
+          PDM_PUBLISH_PASSWORD: ${{ secrets.PYPI_TOKEN }}
         run: |
-          poetry publish --username __token__ --build
-          echo "::set-output name=version::$(poetry version -s)"
+          pdm publish --username __token__
+          current_version=$(pdm version)
+          echo "::set-output name=version::$current_version"
       - name: Commit version
         if: ${{ github.ref == 'refs/heads/main' }}
         env:
           GITHUB_TOKEN: ${{ secrets.BOT_TOKEN }}
         run: |
+          current_version=$(pdm version)
           git remote set-url origin https://${{ secrets.BOT_TOKEN }}@github.com/${{ github.repository }}
 
           git config user.name "Python Italia [bot]"
           git config user.email "noreply@python.it"
 
           git add pyproject.toml
-          git commit -m "🔨 Publish plugin v$(poetry version -s) [skip ci]"
+          git commit -m "🔨 Publish plugin v$current_version [skip ci]"
           git push
       - name: Create or update comment
         uses: peter-evans/create-or-update-comment@v1

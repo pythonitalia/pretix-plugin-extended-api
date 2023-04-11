@@ -256,7 +256,7 @@ def no_admission_order(event, normal_item):
             attendee_name_parts={"full_name": "Peter", "_scheme": "full"},
             attendee_email="",
             secret="z3fsn8jyufm5kpk768q69gkbyr5f4h6w",
-            pseudonymization_id="ABCDEFGHKL",
+            pseudonymization_id="EAKII",
         )
         return o
 

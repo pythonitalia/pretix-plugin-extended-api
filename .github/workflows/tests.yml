@@ -20,20 +20,17 @@ jobs:
         uses: actions/setup-python@v1
         with:
           python-version: 3.9
-      - name: Install poetry
-        run: pip install poetry
-      - name: Set Poetry config
-        run: |
-          poetry config virtualenvs.path ~/.virtualenvs
+      - name: Install pdm
+        run: pip install pdm
       - uses: actions/cache@v1
         with:
           path: ~/.virtualenvs
-          key: ${{ runner.os }}-poetry-${{ hashFiles('**/poetry.lock') }}
+          key: ${{ runner.os }}-pdm-${{ hashFiles('**/pdm.lock') }}
           restore-keys: |
-            ${{ runner.os }}-poetry-
+            ${{ runner.os }}-pdm-
       - name: Install system dependencies
         run: sudo apt update && sudo apt install gettext
       - name: Install Dependencies
-        run: poetry install
+        run: pdm install
       - name: Run checks
-        run: poetry run pytest tests
+        run: pdm run pytest tests

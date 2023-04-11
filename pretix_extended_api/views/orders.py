@@ -20,6 +20,9 @@ class OrdersViewSet(viewsets.ViewSet):
             context={
                 "request": request,
                 "event": request.event,
+                "pdf_data": False,
+                "include": [],
+                "exclude": [],
             },
         )
         return Response(serializer.data)

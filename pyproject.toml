@@ -18,7 +18,7 @@ pretix_extended_api = "pretix_extended_api:PretixPluginMeta"
 
 [project]
 name = "pretix-plugin-extended-api"
-version = "0.1.10"
+version = "0.1.11"
 description = "Extend the REST API to expose more information needed by the PyCon Italia repository."
 authors = [
     {name = "Python Italia"},
@@ -27,8 +27,6 @@ dependencies = []
 requires-python = ">=3.9,<4.0"
 readme = "README.rst"
 license = {text = "MIT"}
-
-[project.urls]
 
 [project.entry-points."pretix.plugin"]
 pretix_extended_api = "pretix_extended_api:PretixPluginMeta"

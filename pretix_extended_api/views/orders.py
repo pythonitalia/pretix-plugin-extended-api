@@ -1,5 +1,5 @@
 from pretix.api.serializers.order import OrderSerializer
-from pretix.api.views.order import OrderViewSet
+from pretix.api.views.order import EventOrderViewSet
 from rest_framework import viewsets
 from rest_framework.response import Response
 
@@ -11,7 +11,7 @@ class OrdersViewSet(viewsets.ViewSet):
         check_permission(request, "can_view_orders")
 
         codes = pk.split(",")
-        qs = OrderViewSet(request=request).get_queryset()
+        qs = EventOrderViewSet(request=request).get_queryset()
         orders = qs.filter(code__in=codes)
 
         serializer = OrderSerializer(

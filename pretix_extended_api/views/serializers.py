@@ -1,6 +1,6 @@
 from pretix.api.serializers.i18n import I18nAwareModelSerializer
 from pretix.api.serializers.item import ItemSerializer, QuestionSerializer
-
+from pretix.api.serializers.order import PositionDownloadsField
 from pretix.api.serializers.voucher import VoucherSerializer
 from pretix.base.models import OrderPosition, QuestionAnswer
 from rest_framework import serializers
@@ -31,6 +31,7 @@ class AnswerSerializer(I18nAwareModelSerializer):
 class OrderPositionSerializer(I18nAwareModelSerializer):
     answers = AnswerSerializer(many=True)
     attendee_name = serializers.CharField(required=False)
+    downloads = PositionDownloadsField(source="*", read_only=True)
 
     class Meta:
         model = OrderPosition
@@ -57,6 +58,7 @@ class OrderPositionSerializer(I18nAwareModelSerializer):
             "variation",
             "voucher",
             "zipcode",
+            "downloads",
         )
 
     def __init__(self, *args, **kwargs):
